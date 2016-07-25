@@ -76,6 +76,12 @@ public:
 	}
 	void Find_MAXIMUM_SUBARRAY(){
 		seq= Find_Maximum_Subarray(0,A.size()-1);
+		if(seq[2]<0){    //算法导论4.1-4
+			seq[2]=0;
+			cout<<"MAXIMUM SUBARRAY is empty!"<<endl;
+			cout<<seq[2];
+			return ;
+		}
 		Print_A();
 		cout<<"result:"<<endl;
 		for(int i=0;i<seq.size();i++)
