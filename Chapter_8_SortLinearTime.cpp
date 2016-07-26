@@ -95,7 +95,7 @@ public:
 			cout<<A[i]<<"  ";
 		cout<<endl;		
 	}
-
+	//时间大概是O(b(n+27)) b是最长字符串长度,n是单词串个数
 	void Str_Counting_SORT(vector<string> &str){ //字符串的基数排序
 		int d=INT_MIN;                //d是最大字符串长度
 		for(int i=0;i<str.size();i++){
