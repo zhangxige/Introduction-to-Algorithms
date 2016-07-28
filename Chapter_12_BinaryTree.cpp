@@ -1,244 +1,290 @@
-/*二叉树的遍历*/ 
-
-#include <iostream>
-#include<string.h>
-#include<stack> 
+#include<iostream>
+#include<vector>
+#include<cmath>
+#include<stack>
 using namespace std;
 
-typedef struct node
-{
-    char data;
-    struct node *lchild,*rchild;
-}BinTree;
+struct TreeNode{
+	int val;
+	TreeNode *lchild,*rchild,*parent;
+	TreeNode():lchild(NULL),rchild(NULL),parent(NULL){}
+}; 
 
-typedef struct node1
-{
-    BinTree *btnode;
-    bool isFirst;
-}BTNode;
+class Solution_BinaryTree{ //二叉搜索树
+private:
+	TreeNode *root;
+
+	TreeNode* CreatNode(int n){ //创建一个节点
+		TreeNode* temp;
+		temp = new TreeNode;
+		temp->val = n;
+		return temp;
+	}
+
+public:
+	TreeNode *Return_Root(){     //返回根节点对外借口
+		return root;
+	}
+	
+	// a中输入的数据必须为二叉搜索树的合法数据 也就是说 父节点的数据一定要大于其左子树的数据小于其右子树数据（关键字）
+	bool Creat_Tree(int a[],int n){ //如果a[i]<0就在该插入节点的位置插入NULL
+		if( n<1 ){
+			cout<<"Input vector a is empty"<<endl;
+			return false;
+		}
+		root=new TreeNode;
+		root->val = a[0];
+		vector<int> p_id(n,0);           //存储树的关系结构
+		vector<TreeNode*> Tree_address;	 //存储生成的节点地址
+		p_id[0]=-1;                      //根节点没有父节点
+		Tree_address.push_back(root);
+		int num=0;                       // num=1表示左孩子 num=2表示右孩子
+		for(int i = 0,j=1; j<n ; j++){  //找到树的结构关系
+			if(a[j]<0) Tree_address.push_back(NULL);
+			else{
+				TreeNode* temp = CreatNode(a[j]);
+				Tree_address.push_back(temp);
+			}
+			if(a[i]<0){
+				while(a[i]<0&&i<n){
+					i++;
+				}
+			}
+			p_id[j]=i;
+			num++;
+			if(num==2){
+				i++;
+				num=0;
+			}
+		}
+		// 根据p_id的关系结构构造树结构
+		for(int j=1; j<n ; j++){
+			if(j%2!=0){
+				Tree_address[p_id[j]]->lchild=Tree_address[j];
+				if(Tree_address[j]!=NULL)
+					Tree_address[j]->parent=Tree_address[p_id[j]];
+			}
+			else{
+				Tree_address[p_id[j]]->rchild=Tree_address[j];
+				if(Tree_address[j]!=NULL)
+					Tree_address[j]->parent=Tree_address[p_id[j]];
+			}
+		}
+		return true;
+	}
+
+	void display(TreeNode *root)        //显示树形结构  先序遍历
+	{ 
+		if( root != NULL ) { 
+			cout<<root->val; 
+			if(root->lchild != NULL || root->rchild != NULL) { 
+				 cout<<'('; 
+				 display(root->lchild); 
+			} 
+			if(root->rchild != NULL || root->lchild != NULL) { 
+				 cout<<','; 
+				 display(root->rchild); 
+				 cout<<')'; 
+			} 
+		} 
+	} 
+
+	void Preorder_Recursion( TreeNode *root ){ //先序递归遍历
+		if( root != NULL ){
+			cout<<root->val<<"  ";
+			Preorder_Recursion( root->lchild );
+			Preorder_Recursion( root->rchild );
+		}
+	}
+
+	void Inorder_Recursion( TreeNode *root ){ //中序递归遍历
+		if( root != NULL ){
+			Inorder_Recursion( root->lchild );
+			cout<<root->val<<"  ";
+			Inorder_Recursion( root->rchild );
+		}
+	}
+
+	void Postorder_Recursion( TreeNode *root ){ //先序递归遍历
+		if( root != NULL ){
+			Postorder_Recursion( root->lchild );
+			Postorder_Recursion( root->rchild );
+			cout<<root->val<<"  ";
+		}
+	}
+
+	void PreOrder_NonRecursion(TreeNode *root)     //非递归前序遍历 
+	{
+		stack<TreeNode*> s;
+		TreeNode *p=root;
+		while(p!=NULL||!s.empty())
+		{
+			while(p!=NULL)
+			{
+				cout<<p->val<<" ";
+				s.push(p);
+				p=p->lchild;
+			}
+			if(!s.empty())
+			{
+				p=s.top();
+				s.pop();
+				p=p->rchild;
+			}
+		}
+	}
+
+	void InOrder_NonRecursion(TreeNode *root)      //非递归中序遍历
+	{
+		stack<TreeNode*> s;
+		TreeNode *p=root;
+		while(p!=NULL||!s.empty())
+		{
+			while(p!=NULL)
+			{
+				s.push(p);
+				p=p->lchild;
+			}
+			if(!s.empty())
+			{
+				p=s.top();
+				cout<<p->val<<" ";
+				s.pop();
+				p=p->rchild;
+			}
+		}    
+	} 
+
+	void PostOrder_NonRecursion(TreeNode *root)    //非递归后序遍历
+	{
+		stack<TreeNode*> s;
+		TreeNode *p=root;
+		TreeNode *temp;
+		while( p != NULL || !s.empty() ){
+		}
+	} 
+
+	TreeNode *Tree_Search(TreeNode *root,int k){  //递归版本查询关键字是否存在
+		if( root == NULL || k == root->val ){
+			return root;
+		}
+		if( k < root->val )
+			return Tree_Search( root->lchild,k );
+		else
+			return Tree_Search( root->rchild,k );
+	}
+	
+	TreeNode *Iterative_Tree_Search(TreeNode *root,int k){ //非递归 迭代版本查询关键字是否存在
+		TreeNode* temp = root;
+		while( temp != NULL && temp->val != k ){
+			if( k < temp->val )
+				temp = temp->lchild;
+			else if( k > temp->val )
+				temp = temp->rchild;
+		}
+		return temp;
+	}
+
+	TreeNode *Tree_Maximum(TreeNode *root){   //返回最大值
+		TreeNode *temp = root;
+		while( temp->rchild != NULL )
+			temp = temp->rchild;
+		return temp;
+	}
+
+	TreeNode *Tree_Minimum(TreeNode *root){   //返回最小值
+		TreeNode *temp = root;
+		while( temp->lchild != NULL )
+			temp = temp->lchild;
+		return temp;
+	}
+
+	TreeNode *Tree_Successor(TreeNode *root){  //返回某一个节点的后继节点,这里root表示任意一个节点
+		TreeNode *temp=root;
+		if( temp->rchild != NULL )
+			return Tree_Minimum( temp->rchild );
+		temp = root->parent;
+		while(temp != NULL && root == temp->rchild ){
+			root = temp;
+			temp = temp->parent;
+		}
+		return temp;
+	}
+
+	TreeNode *Tree_Predecessor(TreeNode *root){  //返回某一个节点的前驱节点,这里root表示任意一个节点
+		TreeNode *temp=root;
+		if( temp->lchild != NULL )
+			return Tree_Maximum( temp->lchild );
+		temp = root->parent;
+		while(temp != NULL && root == temp->lchild ){
+			root = temp;
+			temp = temp->parent;
+		}
+		return temp;
+	}
+
+	void Tree_Insert(TreeNode *root,int k){  //插入节点
+		TreeNode *y,*x,*z;
+		z=CreatNode(k);
+		y=NULL;
+		x=root;
+		while( x != NULL){
+			y=x;
+			if( z->val < x->val )
+				x = x->lchild;
+			else
+				x = x->rchild;
+		}
+		z->parent = y;
+		if( y == NULL )
+			root = z;             // 当树为空时
+		else if( z->val < y->val)
+			y->lchild = z;
+		else
+			y->rchild = z;
+	}
+
+	void Transplant(TreeNode *root,TreeNode *u,TreeNode *v){  //调整节点
+		if( u->parent == NULL)
+			root = v;
+		else if ( u == u->parent->lchild )
+			u->parent->lchild = v;
+		else 
+			u->parent->rchild = v;
+		if( u!= NULL )
+			v->parent = u->parent;
+	}
+
+	bool Tree_Delete(TreeNode *root,TreeNode *z){  //删除节点 z
+		TreeNode *y;
+		if( z->lchild == NULL )
+			Transplant(root,z,z->rchild);
+		else if( z->rchild ==NULL )
+			Transplant(root,z,z->lchild);
+		else{
+			y = Tree_Minimum(z->rchild);
+			if( y->parent != z ){
+				Transplant(root,y,y->rchild);
+				y->rchild = z->rchild;
+				y->rchild ->parent = y;
+			}
+			Transplant(root,z,y);
+			y->lchild = z->lchild;
+			y->lchild->parent = y;
+		}
+	}
+};
 
 
-void creatBinTree(char *s,BinTree *&root)  //创建二叉树，s为形如A(B,C(D,E))形式的字符串 
-{
-    int i;
-    bool isRight=false;
-    stack<BinTree*> s1;          //存放结点 
-    stack<char> s2;              //存放分隔符
-    BinTree *p,*temp;
-    root->data=s[0];
-    root->lchild=NULL;
-    root->rchild=NULL;
-    s1.push(root);
-    i=1;
-    while(i<strlen(s))
-    {
-        if(s[i]=='(')
-        {
-            s2.push(s[i]);
-            isRight=false;
-        }    
-        else if(s[i]==',')    
-        {
-            isRight=true;
-        }
-        else if(s[i]==')')
-        {
-            s1.pop();
-            s2.pop();
-        }
-        else if(isalpha(s[i]))
-        {
-            p=(BinTree *)malloc(sizeof(BinTree));
-            p->data=s[i];
-            p->lchild=NULL;
-            p->rchild=NULL;
-            temp=s1.top();
-            if(isRight==true)    
-            {
-                temp->rchild=p;
-                cout<<temp->data<<"的右孩子是"<<s[i]<<endl;
-            }
-            else
-            {
-                temp->lchild=p;
-                cout<<temp->data<<"的左孩子是"<<s[i]<<endl;
-            }
-            if(s[i+1]=='(')
-                s1.push(p);
-        }
-        i++;
-    }    
-}
+int main(){	
+	int a[] = {4,2,5,-1,3,-1,8,-1,-1,7,-1,-1};//按照每一层树高插入元素，如果a[i]<0,表示插入位置为NULL
+	//int a[] = {6,5,7,2,5,-1,8};
+	int len = sizeof(a)/sizeof(int);
+	Solution_BinaryTree s;
+	s.Creat_Tree(a,len);
 
-void display(BinTree *root)        //显示树形结构 
-{
-    if(root!=NULL)
-    {
-        cout<<root->data;
-        if(root->lchild!=NULL)
-        {
-            cout<<'(';
-            display(root->lchild);
-        }
-        if(root->rchild!=NULL)
-        {
-            cout<<',';
-            display(root->rchild);
-            cout<<')';
-        }
-    }
-}
+	s.display( s.Return_Root() );
 
-void preOrder1(BinTree *root)     //递归前序遍历 
-{
-    if(root!=NULL)
-    {
-        cout<<root->data<<" ";
-        preOrder1(root->lchild);
-        preOrder1(root->rchild);
-    }
-}
-
-void inOrder1(BinTree *root)      //递归中序遍历
-{
-    if(root!=NULL)
-    {
-        inOrder1(root->lchild);
-        cout<<root->data<<" ";
-        inOrder1(root->rchild);
-    }
-} 
-
-void postOrder1(BinTree *root)    //递归后序遍历
-{
-    if(root!=NULL)
-    {
-        postOrder1(root->lchild);
-        postOrder1(root->rchild);
-        cout<<root->data<<" ";
-    }    
-} 
-
-void preOrder2(BinTree *root)     //非递归前序遍历 
-{
-    stack<BinTree*> s;
-    BinTree *p=root;
-    while(p!=NULL||!s.empty())
-    {
-        while(p!=NULL)
-        {
-            cout<<p->data<<" ";
-            s.push(p);
-            p=p->lchild;
-        }
-        if(!s.empty())
-        {
-            p=s.top();
-            s.pop();
-            p=p->rchild;
-        }
-    }
-}
-
-void inOrder2(BinTree *root)      //非递归中序遍历
-{
-    stack<BinTree*> s;
-    BinTree *p=root;
-    while(p!=NULL||!s.empty())
-    {
-        while(p!=NULL)
-        {
-            s.push(p);
-            p=p->lchild;
-        }
-        if(!s.empty())
-        {
-            p=s.top();
-            cout<<p->data<<" ";
-            s.pop();
-            p=p->rchild;
-        }
-    }    
-} 
-
-void postOrder2(BinTree *root)    //非递归后序遍历
-{
-    stack<BTNode*> s;
-    BinTree *p=root;
-    BTNode *temp;
-    while(p!=NULL||!s.empty())
-    {
-        while(p!=NULL)              //沿左子树一直往下搜索，直至出现没有左子树的结点 
-         {
-            BTNode *btn=(BTNode *)malloc(sizeof(BTNode));
-            btn->btnode=p;
-            btn->isFirst=true;
-            s.push(btn);
-            p=p->lchild;
-        }
-        if(!s.empty())
-        {
-            temp=s.top();
-            s.pop();
-            if(temp->isFirst==true)     //表示是第一次出现在栈顶 
-             {
-                temp->isFirst=false;
-                s.push(temp);
-                p=temp->btnode->rchild;    
-            }
-            else                        //第二次出现在栈顶 
-             {
-                cout<<temp->btnode->data<<" ";
-                p=NULL;
-            }
-        }
-    }    
-} 
-
-void postOrder3(BinTree *root)     //非递归后序遍历
-{
-    stack<BinTree*> s;
-    BinTree *cur;                      //当前结点 
-    BinTree *pre=NULL;                 //前一次访问的结点 
-    s.push(root);
-    while(!s.empty())
-    {
-        cur=s.top();
-        if((cur->lchild==NULL&&cur->rchild==NULL)||
-           (pre!=NULL&&(pre==cur->lchild||pre==cur->rchild)))
-        {
-            cout<<cur->data<<" ";  //如果当前结点没有孩子结点或者孩子节点都已被访问过 
-              s.pop();
-            pre=cur; 
-        }
-        else
-        {
-            if(cur->rchild!=NULL)
-                s.push(cur->rchild);
-            if(cur->lchild!=NULL)    
-                s.push(cur->lchild);
-        }
-    }    
-}
-
-
-int main(int argc, char *argv[])
-{
-    char s[100];
-    while(scanf("%s",s)==1)
-    {
-        BinTree *root=(BinTree *)malloc(sizeof(BinTree));
-        creatBinTree(s,root);
-        display(root);
-        cout<<endl;
-        preOrder2(root);
-        cout<<endl; 
-        inOrder2(root);
-        cout<<endl;
-        postOrder2(root);
-        cout<<endl;
-        postOrder3(root);
-        cout<<endl;
-    }
-    return 0;
+	system("pause");
+	return 0;
 }
