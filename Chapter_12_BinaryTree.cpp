@@ -273,6 +273,41 @@ public:
 			y->lchild->parent = y;
 		}
 	}
+	
+	 vector<int> Find_LongList(TreeNode *root){ //在树中，找到深度最长的链
+		vector<int> temp;
+		if(root!=NULL){
+			vector<int> llist,rlist;//分别记录左子树和右子树中最长的链
+			llist=Find_LongList(root->lchild);
+			rlist=Find_LongList(root->rchild);
+			if(llist.size()>=rlist.size()){
+				llist.push_back(root->val);
+				return llist;
+			}
+			else{
+				rlist.push_back(root->val);
+				return rlist;
+			}
+		}
+		else
+			return temp;
+	}
+
+	int Find_MaxDeepth(TreeNode *root){ //返回最大深度
+		if(root!=NULL){
+			int il,ir;      //分别记录左子树和右子树中最大深度
+			il = Find_MaxDeepth(root->lchild);
+			ir = Find_MaxDeepth(root->rchild);
+			if( il >= ir ){
+				return il+1;
+			}
+			else{
+				return ir+1;
+			}
+		}
+		else
+			return 0;
+	}
 };
 
 
